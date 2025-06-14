@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "repository" {
   description = "GitHub repository used in CICD pipeline"
   type        = string
-  default     = "repo:KazikKluz/rsschool-devops-course-tasks:*"
+  default     = "repo:KazikKluz/rsschool-devops:*"
 }
 
 variable "account_id" {
@@ -15,3 +15,4 @@ variable "account_id" {
   type        = string
   default     = "637423385007"
 }
+
