@@ -36,7 +36,7 @@ Lists the files to be ignored by Git in this project.
 
 ### README.md
 
-This documentation file.
+This very documentation file.
 
 ## How to run
 
