@@ -29,6 +29,8 @@ resource "aws_iam_role" "GithubActionsRole" {
   }
 }
 
+# testing comment
+
 resource "aws_iam_role_policy_attachment" "EC2FullAccess" {
   role       = aws_iam_role.GithubActionsRole.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
