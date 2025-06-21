@@ -1,72 +1,81 @@
-# Task 1: AWS Account Configuration
+# Task 2: Basic Infrastructure Configuration
 
-In this Terraform project, we configure an S3 bucket for Terraform state storage and create an IAM role named **GithubActionsRole** with the following policies:
+---
 
-- AmazonEC2FullAccess
-- AmazonRoute53FullAccess
-- AmazonS3FullAccess
-- IAMFullAccess
-- AmazonVPCFullAccess
-- AmazonSQSFullAccess
-- AmazonEventBridgeFullAccess
+### New resources added to infrastructure during this phase:
 
-We also set up an OpenID Connect provider for GitHub Actions to authenticate and assume this role.
+- **VPC**: Service that allows you to launch AWS resources in a logically isolated virtual network.
+- **Public Subnets**: These enables communication between resources in the subnet and the internet, as well as with other AWS services
+- **Private Subnets**: These are isolating resources from the public internet and can only be accessed from within the VPC. They can reach Public Internet via NAT Gateway or NAT Instace
+- **Route Tables and Routes**: Set of rules that determine where network traffic is directed within a Virtual Private Cloud (VPC).
+- **Security Groups**: Stateful rules used to control network traffic at the instance level.
+- **Network ACLs**: Stateless rules used to controll network traffic at the subnet level.
+- **Internet Gateway (IGW)**: A horizontally scaled, redundant, and highly available component that enables instances with public IP addresses to access the internet.
+- **NAT Gateway**: A managed Network Address Translation (NAT) service that enables instances in private subnets within a Virtual Private Cloud (VPC) to connect to services outside the VPC, such as the internet or other AWS services, while maintaining security and isolation.
 
-## Project file structure
+### New files added for Task 2:
 
-### main.tf
+#### **vpc.tf**
 
-Defines the backend configuration for the S3 bucket to store the Terraform state, and sets up the AWS provider.
+Defines the VPC, subnets, and main networking components. Create public and private subnets within the VPC in separate availability zones. Creates the NAT instance with appropriate security groups and routing to allow internet access from private instances as well as Internet Gateway for the Internet connection
 
-### iam.tf
+![VPC Resources](screenshots/image.png)
 
-Creates the IAM role for GitHub Actions and attaches policies for access to AWS services.
+#### **bastion_host.tf**
 
-### variables.tf
+Creates the Bastion host in a public subnet to provide SSH access to private instances.
 
-Contains all variables for the project, such as the region, bucket name, role name, OIDC provider, and repository.
+#### **security_groups.tf**
 
-### .github/workflows/deploy.yml
+Configures the security groups to manage traffic between the NAT instance, private instances, and the internet and to control traffic between the private instance and the Bastion host.
 
-Defines GitHub Actions workflow for deployment using Terraform. It contains steps for formatting, planning, and applying the Terraform configuration automatically upon code changes in the `main` branch.
+![Security Group](screenshots/sec_group.png)
 
-### .gitignore
+#### **routing.tf**
 
-Lists the files to be ignored by Git in this project.
+Creates a route table for private subnets, routing traffic through the **NAT instance** for internet access. Configures route tables for the public subnets, routing traffic through the **Internet Gateway (IGW)**.
 
-### README.md
+#### **network_acls.tf**
 
-This very documentation file.
+Defines the private and public NACL rules to control access to and from the subnets. Associates network ACLs (NACLs) with private and public subnets to manage inbound and outbound traffic.
+![NACL](screenshots/nacl.png)
 
-## How to run
+---
 
-### 1. Install Terraform
+## How to Run
 
-Install Terraform from the [official site](https://www.terraform.io/downloads.html) and verify installation:
+1. **Initialize Terraform**  
+   Run the following command to initialize the project:
 
-```bash
-terraform -v
+   ```bash
+   terraform init
+   ```
+
+2. **Plan and Apply Configuration**  
+    Use the following commands to plan and apply the infrastructure:
+
+   ```bash
+   terraform plan
+   terraform apply
+   ```
+
+```
+NOTE! If you are planning to provision the infrastructure to test, then you need to add your
+own key-pair name for Bastion Host instead of the default one.
 ```
 
-### 2.Plan the Infrastructure:
+![GitHub Actions success](screenshots/image-1.png)
 
-Generate and review an execution plan for the infrastructure:
+3. **Verify Setup**
+   - Ensure the Bastion host is accessible via SSH.
+   - Verify that private instances can reach the internet through the NAT instance.
+   - Check that route tables, security groups, and NACLs are correctly associated.
 
-```bash
-terraform plan
-```
+---
 
-### 3.Deploy the Infrastructure:
+## Cleanup
 
-Apply the changes required to reach the desired state of the configuration:
-
-```bash
-terraform apply
-```
-
-### 4.Delete the Infrastructure: I
-
-In order to delete all provisioned resources, use the following command:
+To destroy all resources, run the following command:
 
 ```bash
 terraform destroy
