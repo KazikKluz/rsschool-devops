@@ -28,38 +28,38 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "vpc_cidr" {
-  description = "CIDR block for the entire VPC"
+variable "vpc_cidr_block" {
+  description = "CIDR block for a new VPC"
   type        = string
   default     = "10.0.0.0/16"
 }
 
-variable "public_subnet_1_cidr" {
-  description = "CIDR blok for the Public Subnet 1"
-  type        = string
-  default     = "10.0.1.0/24"
-}
-
-variable "public_subnet_2_cidr" {
-  description = "CIDR blok for the Public Subnet 2"
-  type        = string
-  default     = "10.0.2.0/24"
-}
-
-variable "private_subnet_1_cidr" {
-  description = "CIDR blok for the Private Subnet 1"
-  type        = string
-  default     = "10.0.3.0/24"
-}
-
-variable "private_subnet_2_cidr" {
-  description = "CIDR blok for the Private Subnet 2"
-  type        = string
-  default     = "10.0.4.0/24"
-}
-
-variable "availability_zones" {
-  description = "set of VPC Availability Zones"
+variable "public_cidrs" {
   type        = list(string)
+  description = "Public Subnet CIDR values"
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+
+variable "private_cidrs" {
+  type        = list(string)
+  description = "Private Subnet CIDR values"
+  default     = ["10.0.101.0/24", "10.0.102.0/24"]
+}
+
+variable "azs" {
+  type        = list(string)
+  description = "Default availability zones"
   default     = ["eu-west-1a", "eu-west-1b"]
+}
+
+variable "ssh_key" {
+  type        = string
+  description = "Key name used to connect to EC2 via SSH"
+  default     = "terraform-key"
+}
+
+variable "instance_type" {
+  type        = string
+  description = "Type and family of EC2 instance"
+  default     = "t2.micro"
 }
