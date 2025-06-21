@@ -8,9 +8,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "terraform-state-9872638"
-    key    = "devops/terraform.tfstate"
-    region = "eu-west-1"
+    bucket  = "terraform-state-9872638"
+    key     = "devops/terraform.tfstate"
+    region  = "eu-west-1"
+    encrypt = true
   }
 }
 
