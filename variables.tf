@@ -63,3 +63,9 @@ variable "instance_type" {
   description = "Type and family of EC2 instance"
   default     = "t2.micro"
 }
+
+variable "token" {
+  description = "k3s token"
+  type        = string
+}
+

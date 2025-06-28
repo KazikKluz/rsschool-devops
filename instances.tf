@@ -17,32 +17,12 @@ data "aws_ami" "al2023" {
 }
 
 resource "aws_instance" "bastion" {
-  ami                         = data.aws_ami.al2023.id
+  ami                         = "ami-06fd44057cc9e8551" # a community NAT ready image from AWS
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.public_subnet[0].id
   associate_public_ip_address = true
-
-  key_name = var.ssh_key
-
-
-
-  security_groups = [
-    aws_security_group.allow_http_and_ssh.id
-  ]
-
-  tags = {
-    Name = "RS Bastion Host"
-  }
-}
-
-resource "aws_instance" "public-instance" {
-  ami                         = data.aws_ami.al2023.id
-  instance_type               = var.instance_type
-  subnet_id                   = aws_subnet.public_subnet[1].id
-  associate_public_ip_address = true
-
-  key_name = var.ssh_key
-
+  source_dest_check           = false
+  key_name                    = var.ssh_key
 
 
   security_groups = [
@@ -50,11 +30,30 @@ resource "aws_instance" "public-instance" {
   ]
 
   tags = {
-    Name = "Public Instance 1"
+    Name = "RS Bastion Host and NAT"
   }
 }
 
-resource "aws_instance" "private-instance-1" {
+# resource "aws_instance" "public-instance" {
+#   ami                         = data.aws_ami.al2023.id
+#   instance_type               = var.instance_type
+#   subnet_id                   = aws_subnet.public_subnet[1].id
+#   associate_public_ip_address = true
+#
+#   key_name = var.ssh_key
+#
+#
+#
+#   security_groups = [
+#     aws_security_group.allow_http_and_ssh.id
+#   ]
+#
+#   tags = {
+#     Name = "Public Instance 1"
+#   }
+# }
+
+resource "aws_instance" "k3s_server" {
   ami                         = data.aws_ami.al2023.id
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.private_subnet[0].id
@@ -62,18 +61,24 @@ resource "aws_instance" "private-instance-1" {
 
   key_name = var.ssh_key
 
+  user_data = templatefile("k3s_server.sh", {
+    token = var.token
+  })
+
+  depends_on = [aws_instance.bastion]
 
 
-  security_groups = [
-    aws_security_group.allow_http_and_ssh.id
+  vpc_security_group_ids = [
+
+    aws_security_group.k3s_server_sg.id
   ]
 
   tags = {
-    Name = "Private Instance 1"
+    Name = "K3s Server"
   }
 }
 
-resource "aws_instance" "private-instance-2" {
+resource "aws_instance" "k3s_agent" {
   ami                         = data.aws_ami.al2023.id
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.private_subnet[1].id
@@ -81,13 +86,18 @@ resource "aws_instance" "private-instance-2" {
 
   key_name = var.ssh_key
 
+  user_data = templatefile("k3s_agent.sh", {
+    token       = var.token,
+    server_addr = aws_instance.k3s_server.private_ip
+  })
 
+  depends_on = [aws_instance.k3s_server]
 
-  security_groups = [
-    aws_security_group.allow_http_and_ssh.id
+  vpc_security_group_ids = [
+    aws_security_group.k3s_agent_sg.id
   ]
 
   tags = {
-    Name = "Private Instance 2"
+    Name = "K3s Agent"
   }
 }
