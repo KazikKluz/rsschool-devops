@@ -44,6 +44,8 @@ jobs:
 
       - name: Create deployment plan
         run: terraform plan
+        env:
+          TF_VAR_token: ${{ secrets.TOKEN }}
 
   terraform-apply:
     runs-on: ubuntu-latest
@@ -70,3 +72,5 @@ jobs:
 
       - name: Deploy infrastructure
         run: terraform apply -auto-approve
+        env:
+          TF_VAR_token: ${{ secrets.TOKEN }}
