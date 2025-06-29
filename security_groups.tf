@@ -91,8 +91,6 @@ resource "aws_vpc_security_group_ingress_rule" "ingress_metrics_k3s_server" {
 resource "aws_vpc_security_group_egress_rule" "egress_any_k3s_server" {
   security_group_id = aws_security_group.k3s_server_sg.id
   cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 0
-  to_port           = 0
   ip_protocol       = "-1"
 }
 
@@ -132,7 +130,5 @@ resource "aws_vpc_security_group_ingress_rule" "ingress_metrics_k3s_agent" {
 resource "aws_vpc_security_group_egress_rule" "egress_any_k3s_agent" {
   security_group_id = aws_security_group.k3s_agent_sg.id
   cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 0
-  to_port           = 0
   ip_protocol       = "-1"
 }
