@@ -3,7 +3,7 @@ name: jenkins_setup
 on:
   push:
     branches:
-      - "**"
+      - "Task-4"
     paths:
       - "jenkins/**"
   workflow_dispatch:
