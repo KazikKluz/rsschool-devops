@@ -2,6 +2,8 @@ name: jenkins_setup
 
 on:
   push:
+    branches:
+      - "**"
     paths:
       - "jenkins/**"
   workflow_dispatch:
