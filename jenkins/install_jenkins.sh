@@ -3,7 +3,7 @@
 kubectl create ns jenkins
 
 # Create Persistent Volume for Jenkins
-# testing pipeline again and
+# testing pipeline again and again
 echo "apiVersion: v1
 kind: PersistentVolume
 metadata:
