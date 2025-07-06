@@ -15,6 +15,7 @@ env:
 jobs:
   install_jenkins:
     runs-on: ubuntu-latest
+    environment: development
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
