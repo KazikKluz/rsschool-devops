@@ -38,8 +38,8 @@ kubectl apply -f jenkins-sa.yaml
 # Create Configuration for Jenkins
 curl https://raw.githubusercontent.com/KazikKluz/rschool-devops-course/refs/heads/Task-4/jenkins/jenkins-values.yaml >~/jenkins-values.yaml
 
-helm repo add jenkinsci https://charts.jenkins.io
-helm repo update
-helm search repo jenkinsci
+sudo helm repo add jenkinsci https://charts.jenkins.io
+sudo helm repo update
+sudo helm search repo jenkinsci
 chart=jenkinsci/jenkins
 sudo helm install jenkins -n jenkins -f jenkins-values.yaml $chart
