@@ -30,20 +30,6 @@ credentialsId:
 renderHelmLabels: true
 
 controller:
-  # adding simple Hello World job to Jenkins with a help of JCasC
-  JCasc:
-    enabled: true
-    configScripts:
-      hello-world: |
-        jobs:
-          - script: >
-              job('hello-world') {
-                description('Simple freestyle Hello World job created via JCasC')
-                steps {
-                  shell('echo Hello World')
-                }
-              }
-
   # -- Used for label app.kubernetes.io/component
   componentName: "jenkins-controller"
   image:
@@ -515,6 +501,7 @@ controller:
   JCasC:
     # -- Enables default Jenkins configuration via configuration as code plugin
     defaultConfig: true
+    enabled: true
 
     # If true, the init container deletes all the plugin config files and Jenkins Config as Code overwrites any existing configuration
     # -- Whether Jenkins Config as Code should overwrite any existing configuration
@@ -523,7 +510,16 @@ controller:
     configUrls: []
     # - https://acme.org/jenkins.yaml
     # -- List of Jenkins Config as Code scripts
-    configScripts: {}
+    configScripts:
+      hello-world: |
+        jobs:
+          - script: >
+              job('hello-world') {
+                description('Simple freestyle Hello World job created via JCasC')
+                steps {
+                  shell('echo Hello World')
+                }
+              }
     #  welcome-message: |
     #    jenkins:
     #      systemMessage: Welcome to our CI\CD server. This Jenkins is configured and managed 'as code'.
