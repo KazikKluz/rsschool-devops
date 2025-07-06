@@ -132,8 +132,6 @@ controller:
 
   # Overrides the init container default values
   # -- Resources allocation (Requests and Limits) for Init Container
-  initContainer:
-    runAsUser: 0
 
   initContainerResources: {}
   # initContainerResources:
@@ -194,6 +192,10 @@ controller:
 
   # -- Deprecated in favor of `controller.podSecurityContextOverride`. uid that will be used for persistent volume.
   fsGroup: 1000
+
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
 
   # If you have PodSecurityPolicies that require dropping of capabilities as suggested by CIS K8s benchmark, put them here
   # securityContextCapabilities:
