@@ -197,6 +197,11 @@ controller:
     runAsUser: 1000
     fsGroup: 1000
 
+  initContainer:
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+
   # If you have PodSecurityPolicies that require dropping of capabilities as suggested by CIS K8s benchmark, put them here
   # securityContextCapabilities:
   #  drop:
