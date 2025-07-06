@@ -25,18 +25,18 @@ kind: StorageClass
 metadata:
   name: jenkins-pv
 provisioner: kubernetes.io/no-provisioner
-volumeBindingMode: WaitForFirstConsumer" >>~/jenkins-volume.yaml
+volumeBindingMode: WaitForFirstConsumer" >~/jenkins-volume.yaml
 
 sudo mkdir /data/jenkins -p
 sudo chown -R 1000:1000 /data/jenkins
 kubectl apply -f jenkins-volume.yaml
 
 # Create Service Account for Jenkins
-curl https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-sa.yaml >>~/jenkins-sa.yaml
+curl https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-sa.yaml >~/jenkins-sa.yaml
 kubectl apply -f jenkins-sa.yaml
 
 # Create Configuration for Jenkins
-curl https://raw.githubusercontent.com/KazikKluz/rschool-devops-course/refs/heads/Task-4/jenkins/jenkins-values.yaml >>~/jenkins-values.yaml
+curl https://raw.githubusercontent.com/KazikKluz/rschool-devops-course/refs/heads/Task-4/jenkins/jenkins-values.yaml >~/jenkins-values.yaml
 kubectl apply -f jenkins-values.yaml
 
 helm repo add jenkinsci https://charts.jenkins.io
