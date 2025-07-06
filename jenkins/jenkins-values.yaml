@@ -1,5 +1,3 @@
-# This file is updated to complement my Jenkins build in a private k3s cluster
-
 # Default values for jenkins.
 # This is a YAML-formatted file.
 # Declare name/value pairs to be passed into your templates.
@@ -32,6 +30,20 @@ credentialsId:
 renderHelmLabels: true
 
 controller:
+  # adding simple Hello World job to Jenkins with a help of JCasC
+  JCasc:
+    enabled: true
+    configScripts:
+      hello-world: |
+        jobs:
+          - script: >
+              job('hello-world') {
+                description('Simple freestyle Hello World job created via JCasC')
+                steps {
+                  shell('echo Hello World')
+                }
+              }
+
   # -- Used for label app.kubernetes.io/component
   componentName: "jenkins-controller"
   image:
