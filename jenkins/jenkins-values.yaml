@@ -69,6 +69,8 @@ controller:
 
   hostNetworking: false
 
+  disableSetupWizard: true
+
   # When enabling LDAP or another non-Jenkins identity source, the built-in admin account will no longer exist.
   # If you disable the non-Jenkins identity store and instead use the Jenkins internal one,
   # you should revert controller.admin.username to your preferred admin user:
@@ -130,8 +132,6 @@ controller:
 
   # Overrides the init container default values
   # -- Resources allocation (Requests and Limits) for Init Container
-  initContainer:
-    runAsUser: 0
   initContainerResources: {}
   # initContainerResources:
   #   requests:
