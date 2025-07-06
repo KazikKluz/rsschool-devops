@@ -130,6 +130,8 @@ controller:
 
   # Overrides the init container default values
   # -- Resources allocation (Requests and Limits) for Init Container
+  initContainer:
+    runAsUser: 0
   initContainerResources: {}
   # initContainerResources:
   #   requests:
