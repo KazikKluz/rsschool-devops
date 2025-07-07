@@ -17,7 +17,7 @@ spec:
     storage: 4Gi
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /data/jenkins-volume/
+    path: /data/jenkins-volume
 
 ---
 apiVersion: storage.k8s.io/v1
@@ -27,8 +27,8 @@ metadata:
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer" >~/jenkins-volume.yaml
 
-sudo mkdir /data/jenkins -p
-sudo chown -R 1000:1000 /data/jenkins
+sudo mkdir /data/jenkins-volume -p
+sudo chown -R 1000:1000 /data/jenkins-volume
 kubectl apply -f jenkins-volume.yaml
 
 # Create Service Account for Jenkins
