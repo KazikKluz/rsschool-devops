@@ -132,13 +132,6 @@ controller:
 
   # Overrides the init container default values
   # -- Resources allocation (Requests and Limits) for Init Container
-  initContainers:
-    - name: init-permission-fix
-      image: busybox
-      command: ['sh', '-c', 'chown -R 1000:1000 /var/jenkins_home']
-      volumeMounts:
-        - name: jenkins-home
-          mountPath: /var/jenkins_home
 
   initContainerResources: {}
   # initContainerResources:
@@ -191,25 +184,24 @@ controller:
   usePodSecurityContext: true
 
   podSecurityContextOverride:
-    runAsUser: 1000
-    runAsGroup: 1000
-    runAsNonRoot: true
-    fsGroup: 1000
-    fsGroupChangePolicy: "OnRootMismatch"
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    fsGroup: 0
 
   # Note that `runAsUser`, `fsGroup`, and `securityContextCapabilities` are
   # being deprecated and replaced by `podSecurityContextOverride`.
   # Set runAsUser to 1000 to let Jenkins run as non-root user 'jenkins', which exists in 'jenkins/jenkins' docker image.
   # When configuring runAsUser to a different value than 0 also set fsGroup to the same value:
   # -- Deprecated in favor of `controller.podSecurityContextOverride`. uid that jenkins runs with.
-  runAsUser: 1000
+  runAsUser: 0
 
   # -- Deprecated in favor of `controller.podSecurityContextOverride`. uid that will be used for persistent volume.
-  fsGroup: 1000
+  fsGroup: 0
 
   securityContext:
-    runAsUser: 1000
-    fsGroup: 1000
+    runAsUser: 0
+    fsGroup: 0
 
   # If you have PodSecurityPolicies that require dropping of capabilities as suggested by CIS K8s benchmark, put them here
   # securityContextCapabilities:
@@ -225,14 +217,13 @@ controller:
   #   supplementalGroups: [1000]
   #   capabilities: {}
   # -- Completely overwrites the contents of the pod security context, ignoring the values provided for `runAsUser`, `fsGroup`, and `securityContextCapabilities`
-  podSecurityContextOverride: ~
 
   # -- Allow controlling the securityContext for the jenkins container
   containerSecurityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
+    runAsUser: 00
+    runAsGroup: 0
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: true
 
   # For minikube, set this to NodePort, elsewhere uses LoadBalancer
   # Use ClusterIP if your setup includes ingress controller
@@ -656,8 +647,8 @@ controller:
       # searchNamespace:
       # -- Enable container security context
       containerSecurityContext:
-        #readOnlyRootFilesystem: true
-        #allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: false
+        allowPrivilegeEscalation: true
         runAsUser: 0
         runAsGroup: 0
 
