@@ -1,0 +1,38 @@
+name: jenkins_setup
+
+on:
+  push:
+    branches:
+      - "Task-4"
+    paths:
+      - "jenkins/**"
+  workflow_dispatch:
+
+env:
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRV }}
+
+jobs:
+  install_jenkins:
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Connection
+        run: |
+          mkdir -p ~/.ssh
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+          echo "${{ secrets.SSH_CONFIG }}" > ~/.ssh/config  # Load SSH config file from secrets to simplify code
+          chmod 600 ~/.ssh/config
+
+      - name: Install Jenkins
+        run: |
+          if ssh Server "kubectl get pods -n jenkins | grep -q 'jenkins'"; then
+            echo "Jenkins is already deployed"
+          else 
+            echo "Installing Jenkins .... // ...." 
+            cat ${{ github.workspace }}/jenkins/jenkins_install.sh | ssh Server 'bash -s'
+          fi;

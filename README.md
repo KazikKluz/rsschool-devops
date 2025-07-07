@@ -3,7 +3,11 @@
 ```bash
 ├── .github
 │   └── workflows
-│       └── deploy.yml
+│       └── jenkins_setup.yml
+├── jenkins
+│   ├── jenkins_install.sh
+│   ├── jenkins-values.yaml
+│   └── jenkins-volume.yaml
 ├── .gitignore
 ├── iam.tf
 ├── instances.tf
@@ -21,9 +25,21 @@
 
 ### Folders/Files Description:
 
-- **.github/workflows/**:
+- **.github/workflows/jenkins_setup.yml**:
 
-  A hidden directory is where workflows for GitHub Actions are stored.
+  - The GitHub Actions file defines a CI/CD workflow for automating tasks related to jenkins installation & configuration
+
+  **jenkins/jenkins_install.sh:**
+
+  - A shell script that automates the installation of Jenkins.
+
+  **jenkins/jenkins-values.yaml:**
+
+  - Jenkins Helm chart values that customize its configuration
+
+  **jenkins/jenkins-volume.yaml:**
+
+  - A manifest describing Kubernetes persistent volume configuration for Jenkins.
 
 - **.gitignore**:
 - This file instructs Git which folders or files should be ignored when tracking changes.
@@ -106,3 +122,36 @@ Host Agent
   - Export `KUBECONFIG` env variable: `export KUBECONFIG=~/.kube/k3s.yaml`
 - In another terminal open a tunnel: `ssh -D 1080 -N -q Bastion` that will launch a SOCKS5 Proxy through the Bastion host
 - Run `kubectl get nodes` to validate the cluster from your local machine
+-
+
+### Jenkins Installation:
+
+- Set up all the necessary github secrets, that are mentioned in the _.github/workflows/jenkins_setup.yml_
+
+* SSH_PRIVATE_KEY: ${{ secrets.SSH_PRV }} - private ssh key that was used in k3s cluster setup
+* SSH_CONFIG: ${{ secrets.SSH_CONFIG }} - ssh configuration that defines connections, e.g.:
+
+```bash
+ ### Configuration for Bastion host
+ Host Bastion
+     HostName your_bastion_host_ip
+     User ec2-user
+     ForwardAgent yes
+     StrictHostKeyChecking no
+
+ Host Server
+     HostName your_k3s_server_ip
+     User ec2-user
+     ProxyJump bastion_host
+     StrictHostKeyChecking no
+```
+
+- Trigger the workflow in _Actions_ tab, or push changes to repository
+
+- The `jenkins_install.sh` script will deploy a pod with Jenkins.
+- Run ssh SOCKS5 proxy.
+- In another terminal, locally forward Jenkin's 8080 port to localhost's 8080:
+
+  `kubectl port-forward svc/jenkins 8080:8080 -n jenkins`
+
+- Access Jenkins from your local machine typing localhost:8080 in a web browser

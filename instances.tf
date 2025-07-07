@@ -18,7 +18,7 @@ data "aws_ami" "al2023" {
 
 resource "aws_instance" "bastion" {
   ami                         = "ami-06fd44057cc9e8551" # a community NAT ready image from AWS
-  instance_type               = var.instance_type
+  instance_type               = var.bastion_instance_type
   subnet_id                   = aws_subnet.public_subnet[0].id
   associate_public_ip_address = true
   source_dest_check           = false
