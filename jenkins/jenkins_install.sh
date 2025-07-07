@@ -31,10 +31,10 @@ sudo mkdir /data/jenkins-volume -p
 sudo chown -R 1000:1000 /data/jenkins-volume
 kubectl apply -f jenkins-volume.yaml
 
-# Create Service Account for Jenkins
-# curl https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-sa.yaml >~/jenkins-sa.yaml
-# kubectl apply -f jenkins-sa.yaml
-# Create Configuration for Jenkins
+#Create Service Account for Jenkins
+curl https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-sa.yaml >~/jenkins-sa.yaml
+kubectl apply -f jenkins-sa.yaml
+#Create Configuration for Jenkins
 curl https://raw.githubusercontent.com/KazikKluz/rsschool-devops/refs/heads/Task-4/jenkins/jenkins-values.yaml >~/jenkins-values.yaml
 
 helm repo add jenkinsci https://charts.jenkins.io
