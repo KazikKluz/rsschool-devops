@@ -9,6 +9,8 @@ kind: PersistentVolume
 metadata:
   name: jenkins-pv
   namespace: jenkins
+  annotations:
+    pv.beta.kubernetes.io/gid: "1000"
 spec:
   storageClassName: jenkins-pv
   accessModes:
