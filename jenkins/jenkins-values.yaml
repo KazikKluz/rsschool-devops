@@ -410,6 +410,7 @@ controller:
   # Plugins will be installed during Jenkins controller start
   # -- List of Jenkins plugins to install. If you don't want to install plugins, set it to `false`
   installPlugins:
+    - job-dsl
     - kubernetes
     - workflow-aggregator
     - git
