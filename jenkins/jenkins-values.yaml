@@ -132,9 +132,13 @@ controller:
 
   # Overrides the init container default values
   # -- Resources allocation (Requests and Limits) for Init Container
-
-  initContainer:
-    runAsUser: 0
+  initContainers:
+    - name: init-permission-fix
+      image: busybox
+      command: ['sh', '-c', 'chown -R 1000:1000 /var/jenkins_home']
+      volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
 
   initContainerResources: {}
   # initContainerResources:
