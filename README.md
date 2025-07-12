@@ -27,7 +27,7 @@
 
 - **.github/workflows/jenkins_setup.yml**:
 
-  - The GitHub Actions file defines a CI/CD workflow for automating tasks related to jenkins installation & configuration
+  - The GitHub Actions file describes a CI/CD workflow for automating tasks related to jenkins installation & configuration
 
   **jenkins/jenkins_install.sh:**
 
