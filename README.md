@@ -1,33 +1,57 @@
 ### Project Structure:
 
 ```bash
-├── .github
-│   └── workflows
-│       └── jenkins_setup.yml
-├── jenkins
-│   ├── jenkins_install.sh
-│   ├── jenkins-values.yaml
-│   └── jenkins-volume.yaml
-├── .gitignore
+
+├── chart-flask-app
+│   ├── charts
+│   ├── Chart.yaml
+│   ├── templates
+│   │   ├── deployment.yaml
+│   │   ├── _helpers.tpl
+│   │   ├── hpa.yaml
+│   │   ├── ingress.yaml
+│   │   ├── NOTES.txt
+│   │   ├── serviceaccount.yaml
+│   │   ├── service.yaml
+│   │   └── tests
+│   │       └── test-connection.yaml
+│   └── values.yaml
+├── chart-flask-app-0.1.0.tgz
+├── flask_app
+│   ├── Dockerfile
+│   ├── main.py
+│   ├── README
+│   └── requirements.txt
 ├── iam.tf
 ├── instances.tf
+├── jenkins
+│   ├── jenkins_install.sh
+│   ├── jenkins-values.yaml
+│   └── jenkins-volume.yaml
 ├── k3s_agent.sh
 ├── k3s_server.sh
 ├── network-acls.tf
 ├── outputs.tf
-├── routing.tf
-├── security_groups.tf
 ├── README.md
+├── routing.tf
+├── screenshots
+│   ├── image-1.png
+│   ├── image.png
+│   ├── nacl.png
+│   └── sec_group.png
+├── security_groups.tf
+├── terraform.tfvars
 ├── variables.tf
 ├── versions.tf
 └── vpc.tf
+
 ```
 
 ### Folders/Files Description:
 
 - **.github/workflows/jenkins_setup.yml**:
 
-  - The GitHub Actions file defines a CI/CD workflow for automating tasks related to jenkins installation & configuration
+  - The GitHub Actions file describes a CI/CD workflow for automating tasks related to jenkins installation & configuration
 
   **jenkins/jenkins_install.sh:**
 
@@ -155,3 +179,52 @@ Host Agent
   `kubectl port-forward svc/jenkins 8080:8080 -n jenkins`
 
 - Access Jenkins from your local machine typing localhost:8080 in a web browser
+
+### Flask App Helm Deployment
+
+#### Build and Publish Docker Image
+
+1. Build the image locally:
+   ```sh
+   docker build -t x00192532/flask-app:latest ./flask_app
+   ```
+2. Push the image to Docker Hub:
+   ```sh
+   docker push x00192532/flask-app:latest
+   ```
+
+#### Create Helm chart
+
+1. Create a basic chart typing:
+
+```bash
+	helm create chart-flask-app
+```
+
+#### Update values.yaml manifest
+
+1. Change image name to your image (here: x00192532/flask-app).
+2. Change ClusterIPs port to the application exposed port (here: 8080).
+
+#### Deploy the Application with Helm
+
+1. From root folder create Helm package pointing the chart folder :
+   ```sh
+   helm package chart-flask-app
+   ```
+2. Install the application from the created package:
+   ```sh
+   helm install chart-flask-app chart-flask-app-0.1.0.tgz
+   ```
+
+## Accessing the Application
+
+1. Port forward the application service
+
+```sh
+	  kubectl port-forward svc/chart-flask-app 8080:8080
+```
+
+2. Access the application from the web browser at the address:
+
+   http://localhost:8080
