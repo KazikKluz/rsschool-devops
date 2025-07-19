@@ -66,7 +66,7 @@
   - A manifest describing Kubernetes persistent volume configuration for Jenkins.
 
 - **.gitignore**:
-- This file instructs Git which folders or files should be ignored when tracking changes.
+- This file instructs Git which folders or files should be ignored when tracking changes
 - **README.md**:
 
   Documentation - The file you're reading right now
