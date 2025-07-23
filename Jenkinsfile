@@ -139,7 +139,7 @@ pipeline {
         }
         stage('Verify App') {
             steps {
-                sh 'curl -v http://flask-app.jenkins.svc.cluster.local:8080/'
+                sh 'curl -v http://flask-app-chart-flask-app.jenkins.svc.cluster.local:8080/'
             }
         }
     }
