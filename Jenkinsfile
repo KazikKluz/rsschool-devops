@@ -3,11 +3,39 @@ pipeline {
         pollSCM('H/1 * * * *')
     }
 
-    agent none
+    agent {
+        kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+                - name: jnlp
+                  image: jenkins/inbound-agent:3309.v27b_9314fd1a_4-6
+
+                - name: python
+                  image: python:3.13
+                  command: ["cat"]
+                  tty: true
+
+                - name: docker
+                  image: docker:28
+                  command: ["cat"]
+                  tty: true
+                  volumeMounts:
+                    - name: docker-sock
+                      mountPath: /var/run/docker.sock
+              volumes:
+                - name: docker-sock
+                  hostPath:
+                    path: /var/run/docker.sock
+                    type: Socket
+            """
+        }
+    }
 
     stages {
-        stage('Checkout') {
-            agent any
+         stage('Checkout') {
             steps {
                 git(
                     url: 'https://github.com/KazikKluz/rsschool-devops.git',
@@ -18,84 +46,65 @@ pipeline {
         }
 
         stage('Build App') {
-            agent {
-                docker {
-                    image 'python:3.13'
-                    args '-u root'  // Needed for pip install with --break-system-packages
-                }
-            }
             steps {
-                sh 'pip install -r flask_app/requirements.txt --break-system-packages'
+                container('python') {
+                    sh 'pip install -r flask_app/requirements.txt --break-system-packages'
+                }
             }
         }
 
         stage('Test App') {
-            agent {
-                docker {
-                    image 'python:3.13'
-                    args '-u root'
-                    reuseNode true  // Reuse the workspace from previous stage
-                }
-            }
             steps {
-                dir('flask_app') {
-                    sh 'pytest test_app.py'
+                container('python') {
+		            dir('flask_app') {
+                        sh 'pytest test_app.py'
+	                }
                 }
             }
         }
 
         stage('SonarCloud check') {
-            agent {
-                docker {
-                    image 'python:3.13'
-                    args '-u root'
-                    reuseNode true
-                }
-            }
             steps {
-                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-                    sh '''
-                        export SONAR_SCANNER_VERSION=7.0.2.4839
-                        export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux-x64
-                        curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux-x64.zip
-                        unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-                        export PATH=$SONAR_SCANNER_HOME/bin:$PATH
-                        export SONAR_SCANNER_OPTS="-server"
+                container('python') {
+                    withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                        sh '''
+			    export SONAR_SCANNER_VERSION=7.0.2.4839
+			    export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux-x64
+			    curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux-x64.zip
+			    unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+		            export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+			    export SONAR_SCANNER_OPTS="-server"
 
-                        sonar-scanner \
-                            -Dsonar.organization=kazikkluz \
-                            -Dsonar.projectKey=KazikKluz_rsschool-devops \
-                            -Dsonar.sources=./flask_app \
-                            -Dsonar.host.url=https://sonarcloud.io \
-                            -Dsonar.login=$SONAR_TOKEN
-                    '''
+			    sonar-scanner \
+ 				-Dsonar.organization=kazikkluz \
+  				-Dsonar.projectKey=KazikKluz_rsschool-devops \
+  				-Dsonar.sources=./flask_app \
+  				-Dsonar.host.url=https://sonarcloud.io
+                                -Dsonar.login=$SONAR_TOKEN
+                        '''
+                    }
                 }
             }
         }
 
-        stage('Docker build and push') {
-            agent {
-                docker {
-                    image 'docker:28'
-                    args '--privileged -v /var/run/docker.sock:/var/run/docker.sock -u root'
-                }
-            }
+        stage('Docker build and push to Docker Hub') {
             steps {
-                dir('flask_app') {
-                    script {
-                        def dockerhub_username = 'x00192532'
-                        def image_name = 'flask-app'
-                        def image_tag = 'latest'
-                        def full_image = "${dockerhub_username}/${image_name}:${image_tag}"
+                container('docker') {
+                    dir('flask_app') {
+                        script {
+                            def dockerhub_username = 'x00192532'
+                            def image_name = 'flask-app'
+                            def image_tag = 'latest'
+                            def full_image = "${dockerhub_username}/${image_name}:${image_tag}"
 
-                        sh "docker build -t ${full_image} ."
-                        sh "docker tag ${full_image} ${dockerhub_username}/${image_name}:latest"
-                        withCredentials([usernamePassword(
-                            credentialsId: 'dockerhub-credentials',
-                            usernameVariable: 'DOCKER_USERNAME',
-                            passwordVariable: 'DOCKER_PASSWORD'
-                        )]) {
-                            sh "echo \$DOCKER_PASSWORD | docker login --username \$DOCKER_USERNAME --password-stdin"
+                            sh "docker build -t ${full_image} ."
+                            sh "docker tag ${full_image} ${dockerhub_username}/${image_name}:latest"
+                            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials',
+                                                            usernameVariable: 'DOCKER_USERNAME',
+                                                            passwordVariable: 'DOCKER_PASSWORD')]) {
+                                sh "echo \$DOCKER_PASSWORD | docker login --username \$DOCKER_USERNAME --password-stdin"
+                            }
+
                             sh "docker push ${full_image}"
                             sh "docker push ${dockerhub_username}/${image_name}:latest"
                         }
@@ -105,7 +114,6 @@ pipeline {
         }
 
         stage('Install Helm') {
-            agent any
             steps {
                 sh '''
                 curl -LO https://get.helm.sh/helm-v3.18.4-linux-amd64.tar.gz
@@ -117,7 +125,6 @@ pipeline {
         }
 
         stage('Deploy App to Kube') {
-            agent any
             steps {
                 sh """
                     ./helm upgrade --install flask-app ./helm_charts/flask-app \
@@ -131,26 +138,23 @@ pipeline {
                 """
             }
         }
-
         stage('Verify App') {
-            agent any
             steps {
                 sh 'curl -v http://flask-app.jenkins.svc.cluster.local:8080/'
             }
         }
     }
-
     post {
         success {
-            mail to: 'kazikkluz@gmail.com',
-                subject: "SUCCESS: ${currentBuild.fullDisplayName}",
-                body: "The pipeline has succeeded."           
+ 	  mail to: 'kazikkluz@gmail.com',
+            subject: "SUCCESS: ${currentBuild.fullDisplayName}",
+            body: "The pipeline has succeeded."           
         }
 
         failure {
-            mail to: 'kazikkluz@gmail.com',
-                subject: "FAILURE: ${currentBuild.fullDisplayName}",
-                body: "The pipeline has failed."
+          mail to: 'kazikkluz@gmail.com',
+            subject: "FAILURE: ${currentBuild.fullDisplayName}",
+            body: "The pipeline has failed."
         }
     }
 }
