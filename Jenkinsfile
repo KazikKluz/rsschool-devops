@@ -126,7 +126,7 @@ pipeline {
         stage('Deploy App to Kube') {
             steps {
                 sh """
-                    ./helm upgrade --install flask-app ./helm_charts/flask-app \
+                    ./helm upgrade --install flask-app ./chart-flask-app \
                         --namespace jenkins \
                         --set image.repository=x00192532/flask-app \
                         --set image.tag=latest \
