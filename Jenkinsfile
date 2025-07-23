@@ -24,11 +24,11 @@ pipeline {
                   tty: true
                   volumeMounts:
                     - name: docker-sock
-                      mountPath: /var/run/docker.sock
+                      mountPath: /run/containerd/containerd.sock
               volumes:
                 - name: docker-sock
                   hostPath:
-                    path: /var/run/docker.sock
+                    path: /run/containerd/containerd.sock
                     type: Socket
             """
         }
@@ -158,3 +158,5 @@ pipeline {
         }
     }
 }
+
+
