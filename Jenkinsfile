@@ -80,7 +80,6 @@ pipeline {
   				-Dsonar.projectKey=KazikKluz_rsschool-devops \
   				-Dsonar.sources=./flask_app \
   				-Dsonar.host.url=https://sonarcloud.io
-                                -Dsonar.login=$SONAR_TOKEN
                         '''
                     }
                 }
