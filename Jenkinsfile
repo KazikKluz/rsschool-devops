@@ -57,7 +57,7 @@ pipeline {
             steps {
                 container('python') {
 		            dir('flask_app') {
-                        sh 'pytest test_main.py'
+                        sh 'pytest test_app.py'
 	                }
                 }
             }
