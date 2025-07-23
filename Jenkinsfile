@@ -86,7 +86,7 @@ pipeline {
             }
         }
 
-        stage('Docker build and push to Docker Hub') {
+        stage('Docker build and push') {
             steps {
                 container('docker') {
                     dir('flask_app') {
@@ -137,7 +137,7 @@ pipeline {
                 """
             }
         }
-        stage('Verify App') {
+        stage('Smoke Test') {
             steps {
                 sh 'curl -v http://flask-app-chart-flask-app.jenkins.svc.cluster.local:8080/'
             }
