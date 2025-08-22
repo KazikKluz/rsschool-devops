@@ -1,0 +1,10 @@
+prometheus:
+  service:
+    type: ClusterIP
+    port: 9090
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
