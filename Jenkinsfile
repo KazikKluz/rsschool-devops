@@ -39,7 +39,7 @@ yaml """
             steps {
                 git(
                     url: 'https://github.com/KazikKluz/rsschool-devops.git',
-                    branch: '*',
+                    branch: 'Task-7',
                     credentialsId: 'github-credentials'
                 )
             }
