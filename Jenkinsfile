@@ -126,9 +126,9 @@ yaml """
        stage('Add Helm Repository') {
            steps {
         	sh '''
-        	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-                helm repo add grafana https://grafana.github.io/helm-charts
-                helm repo update
+        	./helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                ./helm repo add grafana https://grafana.github.io/helm-charts
+                ./helm repo update
                 '''
            }
        }
@@ -137,7 +137,7 @@ yaml """
 		steps {
 			dir('monitoring'){
 				sh '''
-                                helm upgrade --install my-prometheus prometheus-community/prometheus \
+                                ./helm upgrade --install my-prometheus prometheus-community/prometheus \
                                 --namespace monitoring \
                                 --create-namespace \
                                 --values values-prometheus.yaml
