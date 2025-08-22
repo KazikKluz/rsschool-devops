@@ -136,19 +136,17 @@ yaml """
        }
 
 	stage('Deploy Prometheus'){
-			steps {
-				container('helm'){
-					dir('monitoring'){
-						sh '''
-                                		helm upgrade --install my-prometheus prometheus-community/prometheus \
-                                		--namespace monitoring \
-                                		--create-namespace \
-                                		--values values-prometheus.yaml
-                                		'''
-					}
+		steps {
+			dir('monitoring'){
+				sh '''
+                                helm upgrade --install my-prometheus prometheus-community/prometheus \
+                                --namespace monitoring \
+                                --create-namespace \
+                                --values values-prometheus.yaml
+                                '''
 				}
 			}
-		}
+	}
 
         stage('Deploy App to Kube') {
             steps {
