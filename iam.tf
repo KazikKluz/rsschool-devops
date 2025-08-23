@@ -1,3 +1,5 @@
+# comment just for testing GHA pipeline
+
 resource "aws_iam_role" "GithubActionsRole" {
   name = "GithubActionsRole"
 
