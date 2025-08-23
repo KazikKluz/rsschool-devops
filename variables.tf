@@ -61,5 +61,16 @@ variable "ssh_key" {
 variable "instance_type" {
   type        = string
   description = "Type and family of EC2 instance"
+  default     = "t3.small"
+}
+
+variable "bastion_instance_type" {
+  type        = string
+  description = "Type and family of the Bastion EC2 instance"
   default     = "t2.micro"
+}
+
+variable "token" {
+  description = "k3s token"
+  type        = string
 }
