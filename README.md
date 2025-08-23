@@ -1,23 +1,48 @@
 ### Project Structure:
 
 ```bash
-├── .github
-│   └── workflows
-│       └── jenkins_setup.yml
+├── chart-flask-app
+│   ├── charts
+│   ├── Chart.yaml
+│   ├── templates
+│   │   ├── deployment.yaml
+│   │   ├── _helpers.tpl
+│   │   ├── hpa.yaml
+│   │   ├── ingress.yaml
+│   │   ├── NOTES.txt
+│   │   ├── serviceaccount.yaml
+│   │   ├── service.yaml
+│   │   └── tests
+│   │       └── test-connection.yaml
+│   └── values.yaml
+├── chart-flask-app-0.1.0.tgz
+├── flask_app
+│   ├── Dockerfile
+│   ├── __init__.py
+│   ├── main.py
+│   ├── README
+│   ├── requirements.txt
+│   └── test_app.py
+├── iam.tf
+├── instances.tf
 ├── jenkins
 │   ├── jenkins_install.sh
 │   ├── jenkins-values.yaml
 │   └── jenkins-volume.yaml
-├── .gitignore
-├── iam.tf
-├── instances.tf
+├── Jenkinsfile
 ├── k3s_agent.sh
 ├── k3s_server.sh
 ├── network-acls.tf
 ├── outputs.tf
-├── routing.tf
-├── security_groups.tf
 ├── README.md
+├── routing.tf
+├── screenshots
+│   ├── image-1.png
+│   ├── image.png
+│   ├── nacl.png
+│   └── sec_group.png
+├── security_groups.tf
+├── terraform.tfvars
 ├── variables.tf
 ├── versions.tf
 └── vpc.tf
@@ -27,7 +52,7 @@
 
 - **.github/workflows/jenkins_setup.yml**:
 
-  - The GitHub Actions file defines a CI/CD workflow for automating tasks related to jenkins installation & configuration
+  - The GitHub Actions file describes a CI/CD workflow for automating tasks related to jenkins installation & configuration
 
   **jenkins/jenkins_install.sh:**
 
@@ -155,3 +180,97 @@ Host Agent
   `kubectl port-forward svc/jenkins 8080:8080 -n jenkins`
 
 - Access Jenkins from your local machine typing localhost:8080 in a web browser
+
+### Flask App Helm Deployment
+
+#### Build and Publish Docker Image
+
+1. Build the image locally:
+   ```sh
+   docker build -t x00192532/flask-app:latest ./flask_app
+   ```
+2. Push the image to Docker Hub:
+   ```sh
+   docker push x00192532/flask-app:latest
+   ```
+
+#### Create Helm chart
+
+1. Create a basic chart typing:
+
+```bash
+	helm create chart-flask-app
+```
+
+#### Update values.yaml manifest
+
+1. Change image name to your image (here: x00192532/flask-app).
+2. Change ClusterIPs port to the application exposed port (here: 8080).
+
+#### Deploy the Application with Helm
+
+1. From root folder create Helm package pointing the chart folder :
+   ```sh
+   helm package chart-flask-app
+   ```
+2. Install the application from the created package:
+   ```sh
+   helm install chart-flask-app chart-flask-app-0.1.0.tgz
+   ```
+
+## Accessing the Application
+
+1. Port forward the application service
+
+```sh
+	  kubectl port-forward svc/chart-flask-app 8080:8080
+```
+
+2. Access the application from the web browser at the address:
+
+   http://localhost:8080
+
+## Deploying App with Jenkins Pipeline
+
+**Jenkinsfile** allows to desciribe the **pipeline as code** using **Groovy** syntax, dividing pipeline into following jobs:
+
+1. **Checkout** – Clones the code from the repository.
+2. **Build App** – Builds the Docker image of the Flask app.
+3. **Test App** – Runs tests against the code.
+4. **SonarCloud check** – Runs an automated code review and security analysis.
+5. **Docker build and push** – Pushes the built image to Docker Hub.
+6. **Install Helm** - installs the latest version of Helm
+7. **Deploy App to Kube** – Deploys the Flask app to the Kubernetes cluster using Helm.
+8. **Smoke Test** – "Curls" the deployment URL in order to check that the app if app is accessible.
+9. **Notification** – Sends an email with a short description if the build successed or failed.
+
+### Essential credentials to make pipeline work
+
+1. **Docker Hub**: In order to push Docker images from Jenkins to Docker Hub In Jenkins, we need to add Docker Hub username and password as a global credential (type: Username with password, ID: `dockerhub-credentials`).
+2. **GitHub**: Jenkins has to have access to the GitHub reposioty Jenkins job configuration. When the pipeline is triggered (manually or by repo push) it clones repository locally where the code is tested, build and Dockerized. Here we create a uniqu Github token and save as `github-credentials`.
+3. **Sonar Cloud**: As part of the pipeline we want an automated code review for security, dependability, and maintainability with every pull request in order to producing cleaner, more maintainable code. Upon connecting to our GitHub organization we are provided with `SONAR_TOKEN`, that should be added to Jenkins credentials
+
+### How to Create SonarQube Cloud account
+
+1. Visit SonarQube Cloud at: https://sonarcloud.io
+2. Sign in with GitHub for free SonarQube Cloud account.
+3. Import organization from GitHub.
+4. Authorize access to your repository
+5. Create new organization
+6. Select the repository to be monitored and revied automatically each time you push new code.
+7. Use provided token, to integrate SonarQube Cloud with your Jenkins server and allowing the code being revied as part of the pipeline job
+
+### Add the Pipeline to Jenkins
+
+From Dashboard choose New Item, then Pipeline
+
+- Choose name: `rsschool-pipeline`
+- SCM: `Git`
+- Repository URL: `https://github.com/KazikKluz/rsschool-devops-course.git`
+- Credentials: `none`
+- Branches to build: `*Task-6`
+- Script Path: `./Jenkinsfile`
+
+Manually trigger the build from the GUI. From now on, the pipeline is configured to poll the repository each minute, but will only run if changes are detected.
+
+The result of the pipeline execution ( success of failure ) will be sent as notification to your email box.
