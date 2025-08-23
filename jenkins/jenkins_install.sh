@@ -41,4 +41,4 @@ helm repo add jenkinsci https://charts.jenkins.io
 helm repo update
 helm search repo jenkinsci
 chart=jenkinsci/jenkins
-helm install jenkins -n jenkins -f jenkins-values.yaml $chart
+sudo helm install jenkins -n jenkins -f jenkins-values.yaml $chart
