@@ -20,19 +20,19 @@ yaml """
 
                 - name: docker
                   image: docker:28-dind
-		  securityContext:
-		    privileged: true
+                  securityContext:
+                    privileged: true
                   command: ["cat"]
                   tty: true
-	          env: 
-	            - name: DOCKER_TLS_CERTDIR
-		      value: ""
+                  env: 
+                    - name: DOCKER_TLS_CERTDIR
+                      value: ""
                   volumeMounts:
                     - name: docker-sock
                       mountPath: /var/run/docker.sock
               volumes:
                 - name: docker-sock
-		  emptyDir: {}
+                  emptyDir: {}
             """
         }
     }
@@ -115,17 +115,6 @@ yaml """
             }
         }
 
-        stage('Install Helm') {
-            steps {
-                sh '''
-                curl -LO https://get.helm.sh/helm-v3.18.4-linux-amd64.tar.gz
-                tar -zxvf helm-v3.18.4-linux-amd64.tar.gz
-                mv linux-amd64/helm ./helm
-                chmod +x ./helm
-                '''
-            }
-        }
-
        stage('Add Helm Repository') {
            steps {
         	sh '''
@@ -171,15 +160,11 @@ yaml """
     }
     post {
         success {
- 	  mail to: 'kazikkluz@gmail.com',
-            subject: "SUCCESS: ${currentBuild.fullDisplayName}",
-            body: "The pipeline has succeeded."           
+          slackSend  color: "good", message: "The pipeline has succeeded. ${currentBuild.fullDisplayName}"
         }
 
         failure {
-          mail to: 'kazikkluz@gmail.com',
-            subject: "FAILURE: ${currentBuild.fullDisplayName}",
-            body: "The pipeline has failed."
+          slackSend  color: "danger", message: "The pipeline has failed. ${currentBuild.fullDisplayName}"
         }
     }
 }
