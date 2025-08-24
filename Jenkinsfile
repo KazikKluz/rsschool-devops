@@ -19,17 +19,20 @@ yaml """
                   tty: true
 
                 - name: docker
-                  image: docker:28
+                  image: docker:28-dind
+		  securityContext:
+		    privileged: true
                   command: ["cat"]
                   tty: true
+	          env: 
+	            - name: DOCKER_TLS_CERTDIR
+		      value: ""
                   volumeMounts:
                     - name: docker-sock
                       mountPath: /var/run/docker.sock
               volumes:
                 - name: docker-sock
-                  hostPath:
-                    path: /var/run/docker.sock
-                    type: Socket
+		  emptyDir: {}
             """
         }
     }
@@ -39,7 +42,7 @@ yaml """
             steps {
                 git(
                     url: 'https://github.com/KazikKluz/rsschool-devops.git',
-                    branch: 'Task-7',
+                    branch: 'T66',
                     credentialsId: 'github-credentials'
                 )
             }
