@@ -22,7 +22,6 @@ yaml """
                   image: docker:28-dind
                   securityContext:
                     privileged: true
-                  command: ["cat"]
                   tty: true
                   env: 
                     - name: DOCKER_TLS_CERTDIR
