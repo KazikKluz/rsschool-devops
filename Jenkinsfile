@@ -28,7 +28,7 @@ yaml """
                       value: ""
                   volumeMounts:
                     - name: docker-sock
-                      mountPath: /var/run/docker.sock
+                      mountPath: /var/run # mount parent dir to avoid conflict
               volumes:
                 - name: docker-sock
                   emptyDir: {}
